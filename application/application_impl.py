@@ -16,6 +16,8 @@ class ApplicationImpl(Application):
     loop = asyncio.get_event_loop()
     difference = 0.01
 
+    # Some exchanges have n't info about some pairs
+    # Some of them will calculate through common currency - USD.
     strategy = (
         {'pair': (currencies.BTC, currencies.LTC), 'func': min,
          'to_revert': (LivecoinFetcher, BitfinexFetcher), 'calc_through': tuple(), 'skip': tuple()},
@@ -43,7 +45,7 @@ class ApplicationImpl(Application):
 
     def _make_futures(self, fetchers, step):
         futures = []
-        for fetcher in self.usable_exchange_fetchers:
+        for fetcher in fetchers:
             if isinstance(fetcher, step['to_revert']):
                 futures.append(partial(self.reverted, **dict(fetcher=fetcher,
                                                              cur1=step['pair'][0], cur2=step['pair'][1])))
@@ -80,4 +82,3 @@ class ApplicationImpl(Application):
 
     def run(self):
         self.loop.run_until_complete(self.get_min_max())
-        # self.loop.run_forever()
