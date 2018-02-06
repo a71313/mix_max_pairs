@@ -17,8 +17,8 @@ class ApplicationImpl(Application):
     difference = 0.01
 
     strategy = (
-        # {'pair': (currencies.BTC, currencies.LTC), 'func': min,
-        #  'to_revert': (LivecoinFetcher, BitfinexFetcher), 'calc_through': tuple(), 'skip': tuple()},
+        {'pair': (currencies.BTC, currencies.LTC), 'func': min,
+         'to_revert': (LivecoinFetcher, BitfinexFetcher), 'calc_through': tuple(), 'skip': tuple()},
         {'pair': (currencies.LTC, currencies.ETH), 'func': min,
          'to_revert': tuple(),
          'calc_through': (BitfinexFetcher, LivecoinFetcher),
