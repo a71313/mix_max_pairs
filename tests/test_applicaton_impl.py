@@ -69,3 +69,6 @@ class TestApp(TestCase):
 
         expected = ('d', 1.4)
         self.assertEqual(res, expected)
+
+    def tearDown(self):
+        self.loop.close()
