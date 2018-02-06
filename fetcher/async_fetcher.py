@@ -10,7 +10,7 @@ class AsyncFetcher(Fetcher):
 
         async with ClientSession() as session:
             if method == "get":
-                request_run = session.get(url, timeout=10)
+                request_run = session.get(url, timeout=10, params=data)
             elif method == "post":
                 request_run = session.post(url, data, timeout=10)
             else:
