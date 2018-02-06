@@ -8,4 +8,4 @@ class PoloniexFetcher(ExchangeFetcher):
     async def get_pair_value(self, cur1, cur2):
         pair = f'{cur1}_{cur2}'
         res = await self.fetcher.fetch(self.url)
-        return {self.name: res[pair]['last']}
+        return (self.name, float(res[pair]['last']))

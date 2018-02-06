@@ -12,4 +12,4 @@ class BittrexFetcher(ExchangeFetcher):
 
         res = await self.fetcher.fetch(self.url, data=data)
 
-        return {self.name: res['result']['Last']}
+        return (self.name, res['result']['Last'])
