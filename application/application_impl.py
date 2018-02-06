@@ -43,6 +43,34 @@ class ApplicationImpl(Application):
             self._usable_exchange_fetchers = (LivecoinFetcher(), BittrexFetcher(), BitfinexFetcher(), PoloniexFetcher())
         return self._usable_exchange_fetchers
 
+    async def calc_through_usd(self, fetcher, cur1, cur2):
+        res1 = await fetcher.get_pair_value(cur1, currencies.USD)
+        res2 = await fetcher.get_pair_value(cur2, currencies.USD)
+        return (res1[0], res1[1] / res2[1])
+
+    async def reverted(self, fetcher, cur1, cur2):
+        res = await fetcher.get_pair_value(cur2, cur1)
+        return res
+
+    async def run_step(self, step):
+        futures = self._make_futures(self.usable_exchange_fetchers, step)
+        pool = Pool(futures)
+        res = await pool.run()
+        print(res)
+        res = filter(None, res)
+        func = step['func']
+        gotten_func_res = func(res, key=lambda x: x[1])
+        return gotten_func_res
+
+    async def get_min_max(self):
+        for step in self.strategy:
+            print(f'Finding {step["func"].__name__} for pair {step["pair"][0]}/{step["pair"][1]}')
+            gotten_func_res = await self.run_step(step)
+            print(f'Found {step["func"].__name__}. It is {gotten_func_res[0]} exchange with value {gotten_func_res[1]}')
+
+    def run(self):
+        self.loop.run_until_complete(self.get_min_max())
+
     def _make_futures(self, fetchers, step):
         futures = []
         for fetcher in fetchers:
@@ -57,28 +85,3 @@ class ApplicationImpl(Application):
             else:
                 futures.append(partial(fetcher.get_pair_value, *(step['pair'][0], step['pair'][1])))
         return futures
-
-    async def calc_through_usd(self, fetcher, cur1, cur2):
-        res1 = await fetcher.get_pair_value(cur1, currencies.USD)
-        res2 = await fetcher.get_pair_value(cur2, currencies.USD)
-        return (res1[0], res1[1] / res2[1])
-
-    async def reverted(self, fetcher, cur1, cur2):
-        res = await fetcher.get_pair_value(cur2, cur1)
-        # return (res[0], 1 / res[1])
-        return res
-
-    async def get_min_max(self):
-        for step in self.strategy:
-            print(f'Finding {step["func"].__name__} for pair {step["pair"][0]}/{step["pair"][1]}')
-            futures = self._make_futures(self.usable_exchange_fetchers, step)
-            pool = Pool(futures)
-            res = await pool.run()
-            print(res)
-            res = filter(None, res)
-            func = step['func']
-            gotten_func_res = func(res, key=lambda x: x[1])
-            print(f'Found {step["func"].__name__}. It is {gotten_func_res[0]} exchange with value {gotten_func_res[1]}')
-
-    def run(self):
-        self.loop.run_until_complete(self.get_min_max())

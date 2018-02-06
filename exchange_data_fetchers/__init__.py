@@ -11,5 +11,5 @@ class ExchangeFetcher(metaclass=ABCMeta):
         self.fetcher = fetcher
 
     @abstractmethod
-    def get_pair_value(self) -> dict:
+    def get_pair_value(self, cur1, cur2) -> tuple:
         pass
